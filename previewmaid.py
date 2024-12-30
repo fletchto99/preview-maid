@@ -34,8 +34,7 @@ def process_library(library):
 def find_missing_previews(libraries):
     log("Searching for missing previews...")
     for library in libraries:
-        if library.type == 'show' or library.type == 'movie':
-            process_library(library)
+        process_library(library)
     log("Missing preview run finished.")
 
 # Get environment variables with default values
