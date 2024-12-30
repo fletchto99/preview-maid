@@ -65,8 +65,10 @@ log("Testing connection to Plex server...")
 test_plex_connection(plex)
 log("Preview Maid will now commence a bootup run..")
 find_missing_previews(plex.library.sections())
+log("Preview Maid has completed the bootup run.")
 
 if RUN_ONCE:
+    log("Run once enabled. Exiting...")
     exit()
 
 log("Preview Maid is now going to run nightly at 00:00.")
