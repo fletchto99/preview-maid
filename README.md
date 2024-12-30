@@ -8,6 +8,10 @@ Preview maid is a tool to help you find missing thumbnail previews in your plex 
 
 The results of the runs are output to the console.
 
+## Building missing previews
+
+You can try to force the creation of missing preview thumbnails using the `Analyze` option on the library. If this fails you can try setting `GenerateBIFKeyframesOnly` to `0` in the [plex advanced settings](https://support.plex.tv/articles/201105343-advanced-hidden-server-settings/). **Note:** This will increase the time it takes to generate preview thumbnails and will greatly increase the load on your CPU.
+
 ## Environment variables
 
 | Variable | Description |
