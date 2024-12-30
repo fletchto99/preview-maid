@@ -31,7 +31,7 @@ print("Preview Maid is running the bootup run...")
 find_missing_previews()
 print("Bootup run complete. Preview Maid is now going to run nightly at 00:00.")
 
-if os.getenv("RUN_ONCE"):
+if os.getenv("RUN_ONCE", False):
     exit()
 
 schedule.every().day.at("00:00").do(find_missing_previews)
