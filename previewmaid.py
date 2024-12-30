@@ -59,11 +59,11 @@ log("Testing connection to Plex server...")
 test_plex_connection(plex)
 log("Preview Maid will now commence a bootup run..")
 find_missing_previews(plex.library.sections())
-log("Preview Maid is now going to run nightly at 00:00.")
 
 if RUN_ONCE:
     exit()
 
+log("Preview Maid is now going to run nightly at 00:00.")
 schedule.every().day.at("00:00").do(lambda: find_missing_previews(plex.library.sections()))
 
 while True:
