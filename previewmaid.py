@@ -63,17 +63,16 @@ plex = PlexServer(PLEX_URL, PLEX_TOKEN, timeout=600)
 
 log("Testing connection to Plex server...")
 test_plex_connection(plex)
-log("Preview Maid will now commence a bootup run..")
-find_missing_previews(plex.library.sections())
-log("Preview Maid has completed the bootup run.")
 
 if RUN_ONCE:
-    log("Run once enabled. Exiting...")
+    log("Preview Maid is running in one-time mode...")
+    find_missing_previews(plex.library.sections())
+    log("Run completed. Exiting...")
     exit()
+else:
+    log("Preview Maid is scheduled to run nightly at 00:00.")
+    schedule.every().day.at("00:00").do(lambda: find_missing_previews(plex.library.sections()))
 
-log("Preview Maid is now going to run nightly at 00:00.")
-schedule.every().day.at("00:00").do(lambda: find_missing_previews(plex.library.sections()))
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+    while True:
+        schedule.run_pending()
+        time.sleep(60)

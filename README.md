@@ -4,7 +4,7 @@
 ![Docker Build Status](https://github.com/fletchto99/preview-maid/actions/workflows/docker.yml/badge.svg)
 ![Docker Pulls](https://img.shields.io/docker/pulls/fletchto99/preview-maid)
 
-Preview maid is a tool to help you find missing thumbnail previews in your plex library. By default it will run upon startup and then be scheduled to run daily at 00:00. The schedule can be optionally turned off via an environment variable.
+Preview maid is a tool to help you find missing thumbnail previews in your plex library. By default it will run daily at 00:00. Optionally you can set `RUN_ONCE` to `true` to disable the scheduled runs and have it run immediately.
 
 The results of the runs are output to the console.
 
@@ -18,4 +18,4 @@ You can try to force the creation of missing preview thumbnails using the `Analy
 | :----: | --- |
 | PLEX_URL | The URL to your plex instance. |
 | PLEX_TOKEN | Your plex API token |
-| RUN_ONCE | Set to true to disable scheduled runs, false is default. |
+| RUN_ONCE | Set to true to disable scheduled runs; default false |
