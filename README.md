@@ -6,6 +6,8 @@
 
 Preview maid is a tool to help you find missing thumbnail previews in your plex library. By default it will run upon startup and then be scheduled to run daily at 00:00. The schedule can be optionally turned off via an environment variable.
 
+The results of the runs are output to the console.
+
 ## Environment variables
 
 | Variable | Description |
