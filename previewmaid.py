@@ -19,6 +19,7 @@ def test_plex_connection(plex):
 
 def is_preview_thumbnails_enabled(library):
     for setting in library.settings():
+        log(f"Setting: {setting.id} - {setting.value}")
         if setting.id == 'generatePreviewThumbnails':
             return setting.value
     return False
