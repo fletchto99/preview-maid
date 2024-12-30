@@ -18,6 +18,7 @@ def test_plex_connection(plex):
         sys.exit(1)
 
 def process_library(library):
+    log(f'Processing {library.title}...')
     for item in library.all():
         if item.type == 'show':
             for episode in item.episodes():
