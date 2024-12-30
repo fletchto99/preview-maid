@@ -66,4 +66,4 @@ schedule.every().day.at("00:00").do(lambda: find_missing_previews(plex.library.s
 
 while True:
     schedule.run_pending()
-    time.sleep(600)
+    time.sleep(60)
