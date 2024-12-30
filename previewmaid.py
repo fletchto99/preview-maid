@@ -17,8 +17,14 @@ def test_plex_connection(plex):
         log(f"Failed to connect to Plex server: {e}")
         sys.exit(1)
 
+def is_preview_thumbnails_enabled(library):
+    for setting in library.settings():
+        if setting.id == 'generatePreviewThumbnails':
+            return setting.value
+    return False
+
 def process_library(library):
-    if not library.generatePreviewThumbnails:
+    if not is_preview_thumbnails_enabled(library):
         log(f"Skipping {library.title}...")
         return
     log(f'Processing {library.title}...')
