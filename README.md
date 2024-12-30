@@ -19,3 +19,5 @@ You can try to force the creation of missing preview thumbnails using the `Analy
 | PLEX_URL | The URL to your plex instance. |
 | PLEX_TOKEN | Your plex API token |
 | RUN_ONCE | Set to true to disable scheduled runs; default false |
+| SKIP_LIBRARY_TYPES | A comma separated list of library types to skip. Options are tv,movie,photo; default "" |
+| SKIP_LIBRARY_NAMES | A comma separated list of library names to skip; default "" |
