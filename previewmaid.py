@@ -18,6 +18,9 @@ def test_plex_connection(plex):
         sys.exit(1)
 
 def process_library(library):
+    if not library.generatePreviewThumbnails:
+        log(f"Skipping {library.title}...")
+        return
     log(f'Processing {library.title}...')
     for item in library.all():
         if item.type == 'show':
