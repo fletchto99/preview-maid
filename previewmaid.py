@@ -9,26 +9,22 @@ from plexapi.server import PlexServer
 def log(message):
     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
 
-def test_plex_connection(plex):
-    try:
-        server_name = plex.friendlyName
-        log(f"Successfully connected to Plex server: {server_name}")
-    except Exception as e:
-        log(f"Failed to connect to Plex server: {e}")
-        sys.exit(1)
-
 def is_preview_thumbnails_enabled(library):
     for setting in library.settings():
         if setting.id == 'enableBIFGeneration':
             return setting.value
     return False
 
+def check_missing_preview_thumbnails(medias):
+    for media in medias:
+        for part in media.parts:
+            if not part.hasPreviewThumbnails:
+                log(f"{part.file} is missing preview thumbnails")
+
 def process_photos(album, path=''):
     for album in album.albums():
         process_photos(album, f"{path}/{album.title}")
-    for clip in album.clips():
-        if not clip.media[0].parts[0].hasPreviewThumbnails:
-            log(f"{clip.media[0].parts[0].file} is missing preview thumbnails")
+    check_missing_preview_thumbnails(album.clips())
 
 def process_library(library, skip_library_types, skip_library_names):
     if not is_preview_thumbnails_enabled(library):
@@ -44,20 +40,24 @@ def process_library(library, skip_library_types, skip_library_names):
     for item in library.all():
         if item.type == 'show':
             for episode in item.episodes():
-                if not episode.hasPreviewThumbnails:
-                    log(f"{item.title} - {episode.title} (Season {episode.parentIndex}, Episode {episode.index}) "
-                          f"is missing preview thumbnails.")
+                check_missing_preview_thumbnails(episode.media)
         elif item.type == 'movie':
-            if not item.hasPreviewThumbnails:
-                log(f"{item.title} is missing preview thumbnails")
+            check_missing_preview_thumbnails(item.media)
         elif item.type == 'photo':
             process_photos(item, item.title)
 
-def find_missing_previews(libraries, skip_library_types, skip_library_names):
-    log("Searching for missing previews...")
-    for library in libraries:
-        process_library(library, skip_library_types, skip_library_names)
-    log("Missing preview run finished.")
+def find_missing_previews(plex_url, plex_token, skip_library_types, skip_library_names):
+    try:
+        log("Testing connection to Plex server...")
+        plex = PlexServer(PLEX_URL, PLEX_TOKEN, timeout=600)
+        server_name = plex.friendlyName
+        log(f"Successfully connected to Plex server: {server_name}")
+        log("Searching for missing previews...")
+        for library in plex.library.sections():
+            process_library(library, skip_library_types, skip_library_names)
+        log("Missing preview run finished.")
+    except Exception as e:
+        log(f"Failed to connect to Plex server for this run")
 
 # Get environment variables with default values
 PLEX_URL = os.getenv("PLEX_URL")
@@ -77,20 +77,15 @@ def exit_gracefully():
 signal.signal(signal.SIGTERM, exit_gracefully)
 signal.signal(signal.SIGINT, exit_gracefully)
 
-plex = PlexServer(PLEX_URL, PLEX_TOKEN, timeout=600)
-
-log("Testing connection to Plex server...")
-test_plex_connection(plex)
-
 if RUN_ONCE:
     log("Preview Maid is running in one-time mode...")
-    find_missing_previews(plex.library.sections(), SKIP_LIBRARY_TYPES, SKIP_LIBRARY_NAMES)
+    find_missing_previews(PLEX_URL, PLEX_TOKEN, SKIP_LIBRARY_TYPES, SKIP_LIBRARY_NAMES)
     log("Run completed. Exiting...")
     exit()
 else:
     log("Preview Maid is scheduled to run nightly at 00:00.")
-    schedule.every().day.at("00:00").do(lambda: find_missing_previews(plex.library.sections(), SKIP_LIBRARY_TYPES, SKIP_LIBRARY_NAMES))
+    schedule.every().day.at("00:00").do(lambda: find_missing_previews(PLEX_URL, PLEX_TOKEN, SKIP_LIBRARY_TYPES, SKIP_LIBRARY_NAMES))
 
     while True:
         schedule.run_pending()
-        time.sleep(60)
+        time.sleep(10)
