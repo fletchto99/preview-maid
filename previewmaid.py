@@ -62,8 +62,6 @@ else:
     logger.info(f'To see missing previews and voice data check "{log_file}"...')
     console_handler.addFilter(lambda record: record.levelno != logging.WARN)
 
-logger.info('Starting Preview Maid...')
-
 # Validate environment variables
 if not PLEX_URL or not PLEX_TOKEN:
     logger.error('Please set the PLEX_URL and PLEX_TOKEN environment variables.')
