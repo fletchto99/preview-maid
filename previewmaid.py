@@ -191,7 +191,7 @@ def find_missing_metadata(plex_url, plex_token, skip_library_types, skip_library
             logger.info('Missing thumbnail preview run finished...')
 
         if FIND_MISSING_VOICE_ACTIVITY:
-            logger.info('Searching for missing thumbnail previews...')
+            logger.info('Searching for missing voice activity data previews...')
             for library in libraries:
                 find_missing_voice_activity_data(library, skip_library_types, skip_library_names)
             logger.info('Missing voice activity data run finished...')
