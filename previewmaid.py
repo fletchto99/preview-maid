@@ -145,8 +145,7 @@ def check_missing_voice_activity_metadata(medias, media_data):
     count = 0
     for media in medias:
         if not media.hasVoiceActivity:
-            nice_resolution = f'{media.videoResolution}p' if not media.videoResolution.endswith('k') else media.videoResolution
-            logger.warning(f'"{media_data}" for resolution {nice_resolution} is missing voice activity data')
+            logger.warning(f'"{media_data}" for resolution {media.videoResolution} is missing voice activity data')
             count += 1
     return count
 
