@@ -1,12 +1,10 @@
-name: GHCR Publish
+name: GHCR Publish Develop
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
-  schedule:
-    - cron: "0 0 * * *"
+      - develop
 
 env:
   REGISTRY: ghcr.io
@@ -39,7 +37,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop
           labels: ${{ steps.meta.outputs.labels }}
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
