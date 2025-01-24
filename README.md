@@ -14,10 +14,20 @@ You can try to force the creation of missing preview thumbnails using the `Analy
 
 ## Environment variables
 
-| Variable | Description |
+| Variable | Description | Default |
+| :----: | --- | --- |
+| PLEX_URL | The URL to your plex instance. | |
+| PLEX_TOKEN | Your plex API token | |
+| FIND_MISSING_THUMBNAIL_PREVIEWS | Set to true to find missing thumbnail previews | true |
+| FIND_MISSING_VOICE_ACTIVITY | Set to true to find missing voice activity analysis data | false |
+| RUN_ONCE | Set to true to disable scheduled runs | false |
+| RUN_TIME | The time to run the job in the format `HH:MM` | 00:00 |
+| SKIP_LIBRARY_TYPES | A comma separated list of library types to skip. Options are movie,show,photo | "" |
+| SKIP_LIBRARY_NAMES | A comma separated list of library names to skip | "" |
+| DEBUG | Set to true to enable debug logging | false |
+
+## Optional Volume Mounts
+
+| Mount | Description |
 | :----: | --- |
-| PLEX_URL | The URL to your plex instance. |
-| PLEX_TOKEN | Your plex API token |
-| RUN_ONCE | Set to true to disable scheduled runs; default false |
-| SKIP_LIBRARY_TYPES | A comma separated list of library types to skip. Options are movie,show,photo; default "" |
-| SKIP_LIBRARY_NAMES | A comma separated list of library names to skip; default "" |
+| `/app/logs` | Used to write logs to a file, rotating per container restart and saving the last 5 restarts. |
