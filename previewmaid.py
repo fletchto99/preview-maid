@@ -45,7 +45,7 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 if not os.path.exists(LOG_DIRECTORY):
-    logger.warn(f'Log directory "{LOG_DIRECTORY}" does not exist, logs will only be output to console...')
+    logger.warning(f'Log directory "{LOG_DIRECTORY}" does not exist, logs will only be output to console...')
 else:
     log_file = os.path.join(LOG_DIRECTORY, 'preview_maid.log')
     file_handler = RotatingFileHandler(
