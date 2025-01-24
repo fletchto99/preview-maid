@@ -58,6 +58,10 @@ else:
     if os.path.getsize(log_file) > 0:
         file_handler.doRollover()
 
+    logger.info(f'Since log file is being used, logs to the console will only show stats...')
+    logger.info(f'To see missing previews and voice data check {log_file}...')
+    console_handler.addFilter(lambda record: record.levelno != logging.WARN)
+
 logger.info('Starting Preview Maid...')
 
 # Validate environment variables
@@ -82,7 +86,7 @@ if RUN_TIME and not re.match(TIME_PATTERN, RUN_TIME):
 
 # Setup signal handlers
 def log_interrupt(signal_received, frame):
-    logger.warning('Received signal to terminate. Exiting...')
+    logger.info('Received signal to terminate. Exiting...')
     exit(0)
 
 signal.signal(signal.SIGTERM, log_interrupt)
@@ -134,7 +138,7 @@ def find_missing_preview_thumbnails(library, skip_library_types, skip_library_na
         elif item.type == 'photo':
             count += process_photos(item)
     if count > 0:
-        logger.warning(f'Found {count} missing preview thumbnails in {library.title}...')
+        logger.info(f'Found {count} missing preview thumbnails in {library.title}...')
     else:
         logger.info(f'No missing preview thumbnails found in {library.title}...')
 
@@ -144,7 +148,7 @@ def check_missing_voice_activity_metadata(medias, media_data):
     for media in medias:
         if not media.hasVoiceActivity:
             nice_resolution = f'{media.videoResolution}p' if not media.videoResolution.endswith('k') else media.videoResolution
-            logger.info(f'"{media_data}" for resolution {nice_resolution} is missing voice activity data')
+            logger.warning(f'"{media_data}" for resolution {nice_resolution} is missing voice activity data')
             count += 1
     return count
 
@@ -168,7 +172,7 @@ def find_missing_voice_activity_data(library, skip_library_types, skip_library_n
         elif item.type == 'movie':
             count += check_missing_voice_activity_metadata(item.media, item.title)
     if count > 0:
-        logger.warning(f'Found {count} files with missing voice activity in {library.title}...')
+        logger.info(f'Found {count} files with missing voice activity in {library.title}...')
     else:
         logger.info(f'No files are missing voice activity data in {library.title}...')
 
