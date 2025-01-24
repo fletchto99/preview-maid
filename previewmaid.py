@@ -15,6 +15,8 @@ PLEX_TOKEN = os.getenv('PLEX_TOKEN')
 # Preview Maid variables
 FIND_MISSING_THUMBNAIL_PREVIEWS = os.getenv('FIND_MISSING_THUMBNAIL_PREVIEWS', 'True').lower() in ('true', '1', 't')
 FIND_MISSING_VOICE_ACTIVITY = os.getenv('FIND_MISSING_VOICE_ACTIVITY', 'False').lower() in ('true', '1', 't')
+FIND_MISSING_INTRO_MARKERS = os.getenv('FIND_MISSING_INTRO_MARKERS', 'False').lower() in ('true', '1', 't')
+FIND_MISSING_CREDITS_MARKERS = os.getenv('FIND_MISSING_CREDITS_MARKERS', 'False').lower() in ('true', '1', 't')
 
 # Run variables
 RUN_ONCE = os.getenv('RUN_ONCE', 'False').lower() in ('true', '1', 't')
@@ -67,8 +69,12 @@ if not PLEX_URL or not PLEX_TOKEN:
     logger.error('Please set the PLEX_URL and PLEX_TOKEN environment variables.')
     exit(1)
 
-if not FIND_MISSING_THUMBNAIL_PREVIEWS and not FIND_MISSING_VOICE_ACTIVITY:
-    logger.error('One of FIND_MISSING_THUMBNAIL_PREVIEWS or FIND_MISSING_VOICE_ACTIVITY must be enabled.')
+if not FIND_MISSING_THUMBNAIL_PREVIEWS and not FIND_MISSING_VOICE_ACTIVITY and not FIND_MISSING_INTRO_MARKERS and not FIND_MISSING_CREDITS_MARKERS:
+    logger.error('One of the following settings must be enabled for previewmaid to work:')
+    logger.error('- FIND_MISSING_THUMBNAIL_PREVIEWS')
+    logger.error('- FIND_MISSING_VOICE_ACTIVITY')
+    logger.error('- FIND_MISSING_INTRO_MARKERS')
+    logger.error('- FIND_MISSING_CREDITS_MARKERS')
     exit(1)
 
 if SKIP_LIBRARY_TYPES != ['']:
@@ -116,14 +122,14 @@ def process_photos(album):
     return count
 
 def find_missing_preview_thumbnails(library, skip_library_types, skip_library_names):
-    if not is_library_setting_enabled(library, 'enableBIFGeneration'):
-        logger.info(f'Skipping {library.title} as preview generation is disabled...')
-        return
     if library.type in skip_library_types:
         logger.info(f'Skipping library {library.title} as {library.type} is in the SKIP_LIBRARY_TYPES list...')
         return
     if library.title in skip_library_names:
         logger.info(f'Skipping library {library.title} as {library.title} is in the SKIP_LIBRARY_NAMES list...')
+        return
+    if not is_library_setting_enabled(library, 'enableBIFGeneration'):
+        logger.info(f'Skipping {library.title} as preview generation is disabled...')
         return
     logger.info(f'Processing library {library.title} of type {library.type}...')
     count = 0
@@ -150,14 +156,14 @@ def check_missing_voice_activity_metadata(medias, media_data):
     return count
 
 def find_missing_voice_activity_data(library, skip_library_types, skip_library_names):
-    if not is_library_setting_enabled(library, 'enableVoiceActivityGeneration'):
-        logger.info(f'Skipping {library.title} as voice activity analysis is disabled...')
-        return
     if library.type in skip_library_types:
         logger.info(f'Skipping {library.title} as {library.type} is in the SKIP_LIBRARY_TYPES list...')
         return
     if library.title in skip_library_names:
         logger.info(f'Skipping {library.title} as {library.title} is in the SKIP_LIBRARY_NAMES list...')
+        return
+    if not is_library_setting_enabled(library, 'enableVoiceActivityGeneration'):
+        logger.info(f'Skipping {library.title} as voice activity analysis is disabled...')
         return
     logger.info(f'Processing {library.title} of type {library.type}...')
     count = 0
@@ -172,6 +178,39 @@ def find_missing_voice_activity_data(library, skip_library_types, skip_library_n
         logger.info(f'Found {count} files with missing voice activity in {library.title}...')
     else:
         logger.info(f'No files are missing voice activity data in {library.title}...')
+
+# Marker functions
+def check_missing_marker_metadata(media, media_data, marker_type):
+    for marker in media.markers:
+        if marker.type == marker_type:
+            return 0
+    logger.warning(f'"{media_data}" is missing {marker_type} markers')
+    return 1
+
+def find_missing_marker_metadata(library, skip_library_types, skip_library_names, marker_type):
+    if library.type in skip_library_types:
+        logger.info(f'Skipping {library.title} as {library.type} is in the SKIP_LIBRARY_TYPES list...')
+        return
+    if library.title in skip_library_names:
+        logger.info(f'Skipping {library.title} as {library.title} is in the SKIP_LIBRARY_NAMES list...')
+        return
+    setting = 'enableIntroMarkerGeneration' if marker_type == 'intro' else 'enableCreditsMarkerGeneration'
+    if not is_library_setting_enabled(library, setting):
+        logger.info(f'Skipping {library.title} as {marker_type} markers are disabled...')
+        return
+    logger.info(f'Processing {library.title} of type {library.type}...')
+    count = 0
+    for item in library.all():
+        if item.type == 'show':
+            for episode in item.episodes():
+                media_data = f'{item.title} - {episode.title} (Season {episode.parentIndex}, Episode {episode.index})'
+                count += check_missing_marker_metadata(episode, media_data, marker_type)
+        elif item.type == 'movie':
+            count += check_missing_marker_metadata(item, item.title, marker_type)
+    if count > 0:
+        logger.info(f'Found {count} files with missing {marker_type} markers in {library.title}...')
+    else:
+        logger.info(f'No files are missing {marker_type} markers in {library.title}...')
 
 # Main logic
 def find_missing_metadata(plex_url, plex_token, skip_library_types, skip_library_names):
@@ -194,6 +233,18 @@ def find_missing_metadata(plex_url, plex_token, skip_library_types, skip_library
             for library in libraries:
                 find_missing_voice_activity_data(library, skip_library_types, skip_library_names)
             logger.info('Missing voice activity data run finished...')
+
+        if FIND_MISSING_INTRO_MARKERS:
+            logger.info('Searching for missing intro markers...')
+            for library in libraries:
+                find_missing_marker_metadata(library, skip_library_types, skip_library_names, 'intro')
+            logger.info('Missing intro marker run finished...')
+
+        if FIND_MISSING_CREDITS_MARKERS:
+            logger.info('Searching for missing credits markers...')
+            for library in libraries:
+                find_missing_marker_metadata(library, skip_library_types, skip_library_names, 'credits')
+            logger.info('Missing credits marker run finished...')
 
         logger.info('Run completed, check the logs for results...')
     except Exception as e:
