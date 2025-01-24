@@ -59,7 +59,7 @@ else:
         file_handler.doRollover()
 
     logger.info(f'Since log file is being used, logs to the console will only show stats...')
-    logger.info(f'To see missing previews and voice data check {log_file}...')
+    logger.info(f'To see missing previews and voice data check "{log_file}"...')
     console_handler.addFilter(lambda record: record.levelno != logging.WARN)
 
 logger.info('Starting Preview Maid...')
