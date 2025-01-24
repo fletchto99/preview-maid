@@ -4,7 +4,7 @@ import re
 import schedule
 import signal
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 from plexapi.server import PlexServer
 
@@ -220,6 +220,7 @@ def find_missing_metadata(plex_url, plex_token, skip_library_types, skip_library
         plex = PlexServer(plex_url, plex_token, timeout=600)
         server_name = plex.friendlyName
         logger.info(f'Successfully connected to Plex server: {server_name}')
+        start_time = datetime.now()
 
         libraries = plex.library.sections()
 
@@ -253,7 +254,8 @@ def find_missing_metadata(plex_url, plex_token, skip_library_types, skip_library
                 find_missing_marker_metadata(library, skip_library_types, skip_library_names, 'ad')
             logger.info('Missing ad marker run finished...')
 
-        logger.info('Run completed, check the logs for results...')
+        elapsed_time = datetime.now() - start_time
+        logger.info(f'Run completed in {timedelta(seconds=elapsed_time.total_seconds())}, check the logs for results...')
     except Exception as e:
         logger.error(f'Failed to connect to Plex server for this run...')
         logger.debug('An exception occurred: %s', e, exc_info=True)
