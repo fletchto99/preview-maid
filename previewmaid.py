@@ -17,6 +17,7 @@ FIND_MISSING_THUMBNAIL_PREVIEWS = os.getenv('FIND_MISSING_THUMBNAIL_PREVIEWS', '
 FIND_MISSING_VOICE_ACTIVITY = os.getenv('FIND_MISSING_VOICE_ACTIVITY', 'False').lower() in ('true', '1', 't')
 FIND_MISSING_INTRO_MARKERS = os.getenv('FIND_MISSING_INTRO_MARKERS', 'False').lower() in ('true', '1', 't')
 FIND_MISSING_CREDITS_MARKERS = os.getenv('FIND_MISSING_CREDITS_MARKERS', 'False').lower() in ('true', '1', 't')
+FIND_MISSING_AD_MARKERS = os.getenv('FIND_MISSING_AD_MARKERS', 'False').lower() in ('true', '1', 't')
 
 # Run variables
 RUN_ONCE = os.getenv('RUN_ONCE', 'False').lower() in ('true', '1', 't')
@@ -69,12 +70,13 @@ if not PLEX_URL or not PLEX_TOKEN:
     logger.error('Please set the PLEX_URL and PLEX_TOKEN environment variables.')
     exit(1)
 
-if not FIND_MISSING_THUMBNAIL_PREVIEWS and not FIND_MISSING_VOICE_ACTIVITY and not FIND_MISSING_INTRO_MARKERS and not FIND_MISSING_CREDITS_MARKERS:
+if not FIND_MISSING_THUMBNAIL_PREVIEWS and not FIND_MISSING_VOICE_ACTIVITY and not FIND_MISSING_INTRO_MARKERS and not FIND_MISSING_CREDITS_MARKERS and not FIND_MISSING_AD_MARKERS:
     logger.error('One of the following settings must be enabled for previewmaid to work:')
     logger.error('- FIND_MISSING_THUMBNAIL_PREVIEWS')
     logger.error('- FIND_MISSING_VOICE_ACTIVITY')
     logger.error('- FIND_MISSING_INTRO_MARKERS')
     logger.error('- FIND_MISSING_CREDITS_MARKERS')
+    logger.error('- FIND_MISSING_AD_MARKERS')
     exit(1)
 
 if SKIP_LIBRARY_TYPES != ['']:
@@ -194,8 +196,7 @@ def find_missing_marker_metadata(library, skip_library_types, skip_library_names
     if library.title in skip_library_names:
         logger.info(f'Skipping {library.title} as {library.title} is in the SKIP_LIBRARY_NAMES list...')
         return
-    setting = 'enableIntroMarkerGeneration' if marker_type == 'intro' else 'enableCreditsMarkerGeneration'
-    if not is_library_setting_enabled(library, setting):
+    if not is_library_setting_enabled(library, f'enable{marker_type.capitalize()}MarkerGeneration'):
         logger.info(f'Skipping {library.title} as {marker_type} markers are disabled...')
         return
     logger.info(f'Processing {library.title} of type {library.type}...')
@@ -245,6 +246,12 @@ def find_missing_metadata(plex_url, plex_token, skip_library_types, skip_library
             for library in libraries:
                 find_missing_marker_metadata(library, skip_library_types, skip_library_names, 'credits')
             logger.info('Missing credits marker run finished...')
+
+        if FIND_MISSING_AD_MARKERS:
+            logger.info('Searching for missing ad markers...')
+            for library in libraries:
+                find_missing_marker_metadata(library, skip_library_types, skip_library_names, 'ad')
+            logger.info('Missing ad marker run finished...')
 
         logger.info('Run completed, check the logs for results...')
     except Exception as e:
