@@ -1,40 +1,91 @@
 # Preview Maid
 
-![GHCR Build Status](https://github.com/fletchto99/preview-maid/actions/workflows/ghcr.yml/badge.svg)
-![Docker Build Status](https://github.com/fletchto99/preview-maid/actions/workflows/docker.yml/badge.svg)
-![Docker Pulls](https://img.shields.io/docker/pulls/fletchto99/preview-maid)
+[![Build Status](https://github.com/fletchto99/preview-maid/actions/workflows/publish_release.yml/badge.svg)](https://github.com/fletchto99/preview-maid/actions/workflows/publish_release.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/fletchto99/preview-maid)](https://hub.docker.com/r/fletchto99/preview-maid)
+[![GitHub License](https://img.shields.io/github/license/fletchto99/preview-maid)](https://github.com/fletchto99/preview-maid/blob/main/LICENSE)
 
-Preview maid is a tool which scans you library items for missing preview thumbnails and, optionally, missing voice activity analysis data & marker data. It can be run as a daily scheduled job at a configurable time or as a one-off job. For more information on how to generate the missing preview thumbnails and voice activity analysis data, see the section below.
+Preview Maid is a tool that scans your Plex library for missing preview thumbnails, voice activity analysis data, and marker data. It can run as a daily scheduled job at a configurable time or as a one-off job.
 
-## Building missing previews, Audio analysis data & Markers
+## Supported Architectures
 
-You can try to force the creation of missing preview thumbnails, Audio analysis data & marker data using the `Analyze` option on the library. Sometimes plex is picky using the analyze button on the library itself, so you can try using the `Analyze` option on the individual media item.
+| Architecture | Available | Tag |
+| :----: | :----: | ---- |
+| x86-64 | ✅ | latest |
+| arm64 | ✅ | latest |
 
-If the preview thumbnail generation fails you can try setting `GenerateBIFKeyframesOnly` to `0` in the [plex advanced settings](https://support.plex.tv/articles/201105343-advanced-hidden-server-settings/). **Note:** This will increase the time it takes to generate preview thumbnails and will greatly increase the load on your CPU.
+## Images
 
-## Setup
+| Registry       | Image                                |
+| -------------- | ------------------------------------ |
+| **GHCR**       | `ghcr.io/fletchto99/preview-maid`    |
+| **Docker Hub** | `fletchto99/preview-maid`            |
 
-### Environment variables
+## Quick Start
+
+### Docker Compose (recommended)
+
+```yaml
+services:
+  preview-maid:
+    image: ghcr.io/fletchto99/preview-maid:latest
+    container_name: preview-maid
+    environment:
+      - PLEX_URL=http://your-plex-server:32400
+      - PLEX_TOKEN=your-plex-token
+      - RUN_TIME=02:00
+    volumes:
+      - /path/to/logs:/app/logs  # optional
+    restart: unless-stopped
+```
+
+### Docker CLI
+
+```bash
+docker run -d \
+  --name preview-maid \
+  -e PLEX_URL=http://your-plex-server:32400 \
+  -e PLEX_TOKEN=your-plex-token \
+  -e RUN_TIME=02:00 \
+  -v /path/to/logs:/app/logs \
+  --restart unless-stopped \
+  ghcr.io/fletchto99/preview-maid:latest
+```
+
+## Configuration
+
+### Environment Variables
 
 | Variable | Description | Default |
-| :----: | --- | --- |
-| PLEX_URL | The URL to your plex instance. | |
-| PLEX_TOKEN | Your plex API token | |
-| FIND_MISSING_THUMBNAIL_PREVIEWS | Set to true to find missing thumbnail previews | true |
-| FIND_MISSING_VOICE_ACTIVITY | Set to true to find missing voice activity analysis data | false |
-| FIND_MISSING_INTRO_MARKERS | Set to true to find missing skip intro markers (note this is slow on large libraries) | false |
-| FIND_MISSING_CREDITS_MARKERS | Set to true to find missing skip credit markers (note this is slow on large libraries) | false |
-| FIND_MISSING_AD_MARKERS | Set to true to find missing ad markers (note this is slow on large libraries) | false |
-| RUN_ONCE | Set to true to disable scheduled runs | false |
-| RUN_TIME | The time to run the job in the format `HH:MM` | 00:00 |
-| SKIP_LIBRARY_TYPES | A comma separated list of library types to skip. Options are movie,show,photo | "" |
-| SKIP_LIBRARY_NAMES | A comma separated list of library names to skip | "" |
-| DEBUG | Set to true to enable debug logging | false |
+| :----: | --- | :----: |
+| `PLEX_URL` | The URL to your Plex instance | *required* |
+| `PLEX_TOKEN` | Your Plex API token | *required* |
+| `FIND_MISSING_THUMBNAIL_PREVIEWS` | Find missing thumbnail previews | `true` |
+| `FIND_MISSING_VOICE_ACTIVITY` | Find missing voice activity analysis data | `false` |
+| `FIND_MISSING_INTRO_MARKERS` | Find missing skip intro markers (slow on large libraries) | `false` |
+| `FIND_MISSING_CREDITS_MARKERS` | Find missing skip credit markers (slow on large libraries) | `false` |
+| `FIND_MISSING_AD_MARKERS` | Find missing ad markers (slow on large libraries) | `false` |
+| `RUN_ONCE` | Run once and exit instead of scheduling | `false` |
+| `RUN_TIME` | Time to run the daily job (`HH:MM` format) | `00:00` |
+| `SKIP_LIBRARY_TYPES` | Comma-separated library types to skip (`movie`, `show`, `photo`) | `""` |
+| `SKIP_LIBRARY_NAMES` | Comma-separated library names to skip | `""` |
+| `DEBUG` | Enable debug logging | `false` |
 
 ### Optional Volume Mounts
 
 | Mount | Description |
 | :----: | --- |
-| `/app/logs` | Used to write logs to a file, rotating per container restart and saving the last 5 restarts. |
+| `/app/logs` | Log file output with rotation (last 5 runs). When mounted, console output shows statistics only. |
 
-**Note:** If the log volumne is mounted, the console output will only show statistics of the run while the affected files will be found in the logs.
+## Building Missing Previews, Audio Analysis & Markers
+
+You can force the creation of missing data using the **Analyze** option on the library or individual media items in Plex.
+
+If preview thumbnail generation fails, try setting `GenerateBIFKeyframesOnly` to `0` in the [Plex advanced settings](https://support.plex.tv/articles/201105343-advanced-hidden-server-settings/). **Note:** This increases generation time and CPU load significantly.
+
+## Building Locally
+
+```bash
+git clone https://github.com/fletchto99/preview-maid.git
+cd preview-maid
+docker build -t preview-maid .
+```
