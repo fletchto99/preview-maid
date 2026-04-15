@@ -15,7 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-check:
+    uses: ./.github/workflows/build_check.yml
+
   build-and-push:
+    needs: build-check
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,6 +52,10 @@ jobs:
           tags: |
             type=raw,value=develop
             type=sha
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
 
       - name: Build and push
         id: push
@@ -58,8 +66,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=develop
+          cache-to: type=gha,mode=max,scope=develop
 
       - name: Attest GHCR image
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
