@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 LABEL org.opencontainers.image.title="preview-maid" \
       org.opencontainers.image.description="Find missing Plex preview thumbnails, voice activity data, and markers" \
