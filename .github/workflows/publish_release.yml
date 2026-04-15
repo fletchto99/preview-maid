@@ -8,7 +8,7 @@ on:
     tags:
       - "v*"
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 6 * * 2" # Rebuild weekly on Tuesdays to pick up base image and dependency updates
 
 env:
   GHCR_REGISTRY: ghcr.io
