@@ -121,10 +121,6 @@ jobs:
           tags: |
             type=raw,value={{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
             type=raw,value=latest,enable={{is_default_branch}}
-          labels: |
-            org.opencontainers.image.title=${{ github.event.repository.name }}
-            org.opencontainers.image.description=${{ github.event.repository.description }}
-            org.opencontainers.image.vendor=${{ github.repository_owner }}
 
       - name: Resolve digests
         id: digests
