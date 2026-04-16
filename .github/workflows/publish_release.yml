@@ -164,6 +164,10 @@ jobs:
         run: |
           docker buildx imagetools create \
             $(jq -cr '.tags | map(select(startswith("${{ env.GHCR_REGISTRY }}")) | "-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            --annotation "index:org.opencontainers.image.title=${{ github.event.repository.name }}" \
+            --annotation "index:org.opencontainers.image.description=${{ github.event.repository.description }}" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            --annotation "index:org.opencontainers.image.vendor=${{ github.repository_owner }}" \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.amd64 }} \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.arm64 }}
 
@@ -171,6 +175,10 @@ jobs:
         run: |
           docker buildx imagetools create \
             $(jq -cr '.tags | map(select(startswith("${{ env.GHCR_REGISTRY }}") | not) | "-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            --annotation "index:org.opencontainers.image.title=${{ github.event.repository.name }}" \
+            --annotation "index:org.opencontainers.image.description=${{ github.event.repository.description }}" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            --annotation "index:org.opencontainers.image.vendor=${{ github.repository_owner }}" \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.amd64 }} \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.arm64 }}
 
