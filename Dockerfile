@@ -11,16 +11,21 @@ WORKDIR /app
 COPY app/requirements.txt requirements.txt
 RUN pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gosu && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --gid 1000 appuser && \
     useradd --uid 1000 --gid appuser --no-create-home appuser
 
 COPY app/previewmaid.py .
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 RUN mkdir -p /app/logs && chown appuser:appuser /app/logs
-
-USER appuser
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=3 \
   CMD python -c "import schedule; import plexapi" || exit 1
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "previewmaid.py"]
