@@ -8,13 +8,15 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY app/requirements.txt requirements.txt
 RUN pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
 
 RUN groupadd --gid 1000 appuser && \
     useradd --uid 1000 --gid appuser --no-create-home appuser
 
-COPY previewmaid.py .
+COPY app/previewmaid.py .
+
+RUN mkdir -p /app/logs && chown appuser:appuser /app/logs
 
 USER appuser
 

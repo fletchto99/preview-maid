@@ -4,3 +4,5 @@
 README.md
 LICENSE
 *.md
+app/tests
+app/requirements-dev.txt
