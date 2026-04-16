@@ -121,10 +121,6 @@ jobs:
           tags: |
             type=raw,value={{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
             type=raw,value=latest,enable={{is_default_branch}}
-          labels: |
-            org.opencontainers.image.title=${{ github.event.repository.name }}
-            org.opencontainers.image.description=${{ github.event.repository.description }}
-            org.opencontainers.image.vendor=${{ github.repository_owner }}
 
       - name: Resolve digests
         id: digests
@@ -139,17 +135,11 @@ jobs:
       - name: Tag per-platform images (GHCR)
         run: |
           DATE_SHA="${{ steps.digests.outputs.date_sha }}"
-          ANNOTATIONS=(
-            --annotation "org.opencontainers.image.title=${{ github.event.repository.name }}"
-            --annotation "org.opencontainers.image.description=${{ github.event.repository.description }}"
-            --annotation "org.opencontainers.image.source=https://github.com/${{ github.repository }}"
-            --annotation "org.opencontainers.image.vendor=${{ github.repository_owner }}"
-          )
-          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
+          docker buildx imagetools create --prefer-index=false \
             -t ${{ env.GHCR_IMAGE }}:amd64-${DATE_SHA} \
             -t ${{ env.GHCR_IMAGE }}:amd64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.amd64 }}
-          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
+          docker buildx imagetools create --prefer-index=false \
             -t ${{ env.GHCR_IMAGE }}:arm64-${DATE_SHA} \
             -t ${{ env.GHCR_IMAGE }}:arm64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.arm64 }}
@@ -157,17 +147,11 @@ jobs:
       - name: Tag per-platform images (Docker Hub)
         run: |
           DATE_SHA="${{ steps.digests.outputs.date_sha }}"
-          ANNOTATIONS=(
-            --annotation "org.opencontainers.image.title=${{ github.event.repository.name }}"
-            --annotation "org.opencontainers.image.description=${{ github.event.repository.description }}"
-            --annotation "org.opencontainers.image.source=https://github.com/${{ github.repository }}"
-            --annotation "org.opencontainers.image.vendor=${{ github.repository_owner }}"
-          )
-          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
+          docker buildx imagetools create --prefer-index=false \
             -t ${{ env.DOCKERHUB_IMAGE }}:amd64-${DATE_SHA} \
             -t ${{ env.DOCKERHUB_IMAGE }}:amd64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.amd64 }}
-          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
+          docker buildx imagetools create --prefer-index=false \
             -t ${{ env.DOCKERHUB_IMAGE }}:arm64-${DATE_SHA} \
             -t ${{ env.DOCKERHUB_IMAGE }}:arm64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.arm64 }}
