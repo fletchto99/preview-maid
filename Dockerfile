@@ -16,6 +16,8 @@ RUN groupadd --gid 1000 appuser && \
 
 COPY app/previewmaid.py .
 
+RUN mkdir -p /app/logs && chown appuser:appuser /app/logs
+
 USER appuser
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=3 \
