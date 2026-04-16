@@ -1,7 +1,5 @@
 import logging
-from dataclasses import dataclass, field
 from types import SimpleNamespace
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -11,15 +9,15 @@ from previewmaid import Config
 @pytest.fixture
 def default_config():
     return Config(
-        plex_url='http://localhost:32400',
-        plex_token='test-token',
+        plex_url="http://localhost:32400",
+        plex_token="test-token",
         find_missing_thumbnail_previews=True,
         find_missing_voice_activity=False,
         find_missing_intro_markers=False,
         find_missing_credits_markers=False,
         find_missing_ad_markers=False,
         run_once=True,
-        run_time='00:00',
+        run_time="00:00",
         skip_library_types=[],
         skip_library_names=[],
         debug=False,
@@ -28,7 +26,7 @@ def default_config():
 
 @pytest.fixture
 def logger():
-    log = logging.getLogger('test_preview_maid')
+    log = logging.getLogger("test_preview_maid")
     log.handlers.clear()
     log.setLevel(logging.DEBUG)
     return log
@@ -41,7 +39,7 @@ def make_part(file_path, has_preview_thumbnails=True):
     return part
 
 
-def make_media(parts=None, has_voice_activity=True, video_resolution='1080'):
+def make_media(parts=None, has_voice_activity=True, video_resolution="1080"):
     media = SimpleNamespace()
     media.parts = parts or []
     media.hasVoiceActivity = has_voice_activity
@@ -57,7 +55,7 @@ def make_marker(marker_type):
 
 def make_episode(title, media, markers=None, parent_index=1, index=1):
     ep = SimpleNamespace()
-    ep.type = 'episode'
+    ep.type = "episode"
     ep.title = title
     ep.media = media
     ep.markers = markers or []
@@ -68,7 +66,7 @@ def make_episode(title, media, markers=None, parent_index=1, index=1):
 
 def make_show(title, episodes):
     show = SimpleNamespace()
-    show.type = 'show'
+    show.type = "show"
     show.title = title
     show.episodes = lambda: episodes
     return show
@@ -76,7 +74,7 @@ def make_show(title, episodes):
 
 def make_movie(title, media, markers=None):
     movie = SimpleNamespace()
-    movie.type = 'movie'
+    movie.type = "movie"
     movie.title = title
     movie.media = media
     movie.markers = markers or []
