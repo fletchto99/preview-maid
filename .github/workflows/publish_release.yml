@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: "0 6 * * 2" # Rebuild weekly on Tuesdays to pick up base image and dependency updates
 
+permissions:
+  contents: read
+
 env:
   GHCR_REGISTRY: ghcr.io
   GHCR_IMAGE: ghcr.io/${{ github.repository }}
