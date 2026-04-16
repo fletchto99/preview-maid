@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 
 from previewmaid import Config, find_missing_metadata, setup_logging
-from tests.conftest import (
+from conftest import (
     make_library,
     make_media,
     make_movie,

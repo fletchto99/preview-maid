@@ -1,3 +1,5 @@
+import logging
+
 from previewmaid import (
     check_missing_marker_metadata,
     check_missing_preview_thumbnails_metadata,
@@ -9,7 +11,7 @@ from previewmaid import (
     process_photos,
     should_skip_library,
 )
-from tests.conftest import (
+from conftest import (
     make_album,
     make_clip,
     make_episode,
@@ -176,7 +178,7 @@ class TestProcessPhotos:
 
 
 class TestFindMissingPreviewThumbnails:
-    def test_finds_missing_in_movies(self, default_config, logger):
+    def test_finds_missing_in_movies(self, default_config, logger, caplog):
         movie = make_movie(
             "Test Movie", [make_media(parts=[make_part("/movie.mkv", False)])]
         )
@@ -186,18 +188,21 @@ class TestFindMissingPreviewThumbnails:
             [movie],
             settings=[make_setting("enableBIFGeneration", True)],
         )
-        find_missing_preview_thumbnails(lib, default_config, logger)
-        # Verify via log output — function doesn't return count directly
+        with caplog.at_level(logging.WARNING, logger="test_preview_maid"):
+            find_missing_preview_thumbnails(lib, default_config, logger)
+        assert "missing preview thumbnails" in caplog.text
 
-    def test_finds_missing_in_shows(self, default_config, logger):
+    def test_finds_missing_in_shows(self, default_config, logger, caplog):
         ep = make_episode("Pilot", [make_media(parts=[make_part("/ep.mkv", False)])])
         show = make_show("Breaking Bad", [ep])
         lib = make_library(
             "TV", "show", [show], settings=[make_setting("enableBIFGeneration", True)]
         )
-        find_missing_preview_thumbnails(lib, default_config, logger)
+        with caplog.at_level(logging.WARNING, logger="test_preview_maid"):
+            find_missing_preview_thumbnails(lib, default_config, logger)
+        assert "missing preview thumbnails" in caplog.text
 
-    def test_skips_disabled_library(self, default_config, logger):
+    def test_skips_disabled_library(self, default_config, logger, caplog):
         movie = make_movie("Test", [make_media(parts=[make_part("/m.mkv", False)])])
         lib = make_library(
             "Movies",
@@ -205,11 +210,14 @@ class TestFindMissingPreviewThumbnails:
             [movie],
             settings=[make_setting("enableBIFGeneration", False)],
         )
-        find_missing_preview_thumbnails(lib, default_config, logger)
+        with caplog.at_level(logging.INFO, logger="test_preview_maid"):
+            find_missing_preview_thumbnails(lib, default_config, logger)
+        assert "Skipping" in caplog.text
+        assert "missing preview thumbnails" not in caplog.text
 
 
 class TestFindMissingVoiceActivity:
-    def test_finds_missing_in_movies(self, default_config, logger):
+    def test_finds_missing_in_movies(self, default_config, logger, caplog):
         movie = make_movie("Test Movie", [make_media(has_voice_activity=False)])
         lib = make_library(
             "Movies",
@@ -217,9 +225,11 @@ class TestFindMissingVoiceActivity:
             [movie],
             settings=[make_setting("enableVoiceActivityGeneration", True)],
         )
-        find_missing_voice_activity_data(lib, default_config, logger)
+        with caplog.at_level(logging.WARNING, logger="test_preview_maid"):
+            find_missing_voice_activity_data(lib, default_config, logger)
+        assert "missing voice activity" in caplog.text
 
-    def test_finds_missing_in_shows(self, default_config, logger):
+    def test_finds_missing_in_shows(self, default_config, logger, caplog):
         ep = make_episode("Pilot", [make_media(has_voice_activity=False)])
         show = make_show("Breaking Bad", [ep])
         lib = make_library(
@@ -228,11 +238,13 @@ class TestFindMissingVoiceActivity:
             [show],
             settings=[make_setting("enableVoiceActivityGeneration", True)],
         )
-        find_missing_voice_activity_data(lib, default_config, logger)
+        with caplog.at_level(logging.WARNING, logger="test_preview_maid"):
+            find_missing_voice_activity_data(lib, default_config, logger)
+        assert "missing voice activity" in caplog.text
 
 
 class TestFindMissingMarkers:
-    def test_finds_missing_intro_markers(self, default_config, logger):
+    def test_finds_missing_intro_markers(self, default_config, logger, caplog):
         ep = make_episode("Pilot", [make_media()], markers=[])
         show = make_show("Breaking Bad", [ep])
         lib = make_library(
@@ -241,9 +253,13 @@ class TestFindMissingMarkers:
             [show],
             settings=[make_setting("enableIntroMarkerGeneration", True)],
         )
-        find_missing_marker_metadata(lib, default_config, "intro", logger)
+        with caplog.at_level(logging.WARNING, logger="test_preview_maid"):
+            find_missing_marker_metadata(lib, default_config, "intro", logger)
+        assert "missing intro markers" in caplog.text
 
-    def test_finds_missing_credits_markers_in_movies(self, default_config, logger):
+    def test_finds_missing_credits_markers_in_movies(
+        self, default_config, logger, caplog
+    ):
         movie = make_movie("Test Movie", [make_media()], markers=[])
         lib = make_library(
             "Movies",
@@ -251,9 +267,11 @@ class TestFindMissingMarkers:
             [movie],
             settings=[make_setting("enableCreditsMarkerGeneration", True)],
         )
-        find_missing_marker_metadata(lib, default_config, "credits", logger)
+        with caplog.at_level(logging.WARNING, logger="test_preview_maid"):
+            find_missing_marker_metadata(lib, default_config, "credits", logger)
+        assert "missing credits markers" in caplog.text
 
-    def test_skips_when_markers_present(self, default_config, logger):
+    def test_skips_when_markers_present(self, default_config, logger, caplog):
         ep = make_episode("Pilot", [make_media()], markers=[make_marker("intro")])
         show = make_show("Breaking Bad", [ep])
         lib = make_library(
@@ -262,4 +280,6 @@ class TestFindMissingMarkers:
             [show],
             settings=[make_setting("enableIntroMarkerGeneration", True)],
         )
-        find_missing_marker_metadata(lib, default_config, "intro", logger)
+        with caplog.at_level(logging.WARNING, logger="test_preview_maid"):
+            find_missing_marker_metadata(lib, default_config, "intro", logger)
+        assert "missing intro markers" not in caplog.text

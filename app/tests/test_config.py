@@ -111,7 +111,8 @@ class TestValidateConfig:
 
     def test_multiple_errors(self, default_config):
         default_config.plex_url = ""
+        default_config.plex_token = ""
         default_config.find_missing_thumbnail_previews = False
         default_config.run_time = "invalid"
         errors = validate_config(default_config)
-        assert len(errors) == 3
+        assert len(errors) == 4
