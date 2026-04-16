@@ -139,11 +139,17 @@ jobs:
       - name: Tag per-platform images (GHCR)
         run: |
           DATE_SHA="${{ steps.digests.outputs.date_sha }}"
-          docker buildx imagetools create --prefer-index=false \
+          ANNOTATIONS=(
+            --annotation "manifest:org.opencontainers.image.title=${{ github.event.repository.name }}"
+            --annotation "manifest:org.opencontainers.image.description=${{ github.event.repository.description }}"
+            --annotation "manifest:org.opencontainers.image.source=https://github.com/${{ github.repository }}"
+            --annotation "manifest:org.opencontainers.image.vendor=${{ github.repository_owner }}"
+          )
+          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
             -t ${{ env.GHCR_IMAGE }}:amd64-${DATE_SHA} \
             -t ${{ env.GHCR_IMAGE }}:amd64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.amd64 }}
-          docker buildx imagetools create --prefer-index=false \
+          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
             -t ${{ env.GHCR_IMAGE }}:arm64-${DATE_SHA} \
             -t ${{ env.GHCR_IMAGE }}:arm64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.arm64 }}
@@ -151,11 +157,17 @@ jobs:
       - name: Tag per-platform images (Docker Hub)
         run: |
           DATE_SHA="${{ steps.digests.outputs.date_sha }}"
-          docker buildx imagetools create --prefer-index=false \
+          ANNOTATIONS=(
+            --annotation "manifest:org.opencontainers.image.title=${{ github.event.repository.name }}"
+            --annotation "manifest:org.opencontainers.image.description=${{ github.event.repository.description }}"
+            --annotation "manifest:org.opencontainers.image.source=https://github.com/${{ github.repository }}"
+            --annotation "manifest:org.opencontainers.image.vendor=${{ github.repository_owner }}"
+          )
+          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
             -t ${{ env.DOCKERHUB_IMAGE }}:amd64-${DATE_SHA} \
             -t ${{ env.DOCKERHUB_IMAGE }}:amd64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.amd64 }}
-          docker buildx imagetools create --prefer-index=false \
+          docker buildx imagetools create --prefer-index=false "${ANNOTATIONS[@]}" \
             -t ${{ env.DOCKERHUB_IMAGE }}:arm64-${DATE_SHA} \
             -t ${{ env.DOCKERHUB_IMAGE }}:arm64-latest \
             ${{ env.GHCR_IMAGE }}@${{ steps.digests.outputs.arm64 }}
