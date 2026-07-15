@@ -101,9 +101,9 @@ idna==3.18 \
     --hash=sha256:7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2 \
     --hash=sha256:ffb385a7e039654cef1ab9ef32c6fafe283c0c0467bba1d9029738ce4a14a848
     # via requests
-plexapi==4.18.1 \
-    --hash=sha256:d8330cee337bc55dc006c392a58b3259239d787a32cbe4064b50a9b07a6e0b35 \
-    --hash=sha256:deba96e94b8b51fc0b042334ebbd48a14e407efd33f281a5d8e9897f9e5dba5f
+plexapi==4.18.2 \
+    --hash=sha256:7ff9f30db57af08407500b2d59e5e57d674d2aa6082dce418086019abb5b8f78 \
+    --hash=sha256:865a90cf44193e750605dec35fc6e1038a15b6f0bda5b3e1779bbe286f7e1da1
     # via -r requirements.txt
 requests==2.34.2 \
     --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0 \
