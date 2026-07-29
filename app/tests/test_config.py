@@ -1,4 +1,4 @@
-from previewmaid import load_config, validate_config, parse_bool_env
+from previewmaid import load_config, parse_bool_env, validate_config
 
 
 class TestParseBoolEnv:

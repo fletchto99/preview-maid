@@ -7,7 +7,7 @@ import signal
 import sys
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import timedelta
 from logging.handlers import RotatingFileHandler
 from typing import NamedTuple
 
@@ -349,7 +349,7 @@ def find_missing_metadata(config: Config, logger: logging.Logger) -> None:
         plex = PlexServer(config.plex_url, config.plex_token, timeout=600)
         server_name = plex.friendlyName
         logger.info(f"Successfully connected to Plex server: {server_name}")
-        start_time = datetime.now()
+        start_time = time.monotonic()
 
         libraries = plex.library.sections()
         scan_functions = {
@@ -367,9 +367,9 @@ def find_missing_metadata(config: Config, logger: logging.Logger) -> None:
                 scan_fn(library, config, *feature.extra_args, logger)
             logger.info(f"{feature.label.capitalize()} run finished...")
 
-        elapsed_time = datetime.now() - start_time
+        elapsed_seconds = time.monotonic() - start_time
         logger.info(
-            f"Run completed in {timedelta(seconds=elapsed_time.total_seconds())}, check the logs for results..."
+            f"Run completed in {timedelta(seconds=elapsed_seconds)}, check the logs for results..."
         )
     except Exception as e:
         logger.error("Failed to connect to Plex server for this run...")

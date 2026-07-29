@@ -1,7 +1,5 @@
 from unittest.mock import MagicMock, patch
 
-
-from previewmaid import Config, find_missing_metadata, setup_logging
 from conftest import (
     make_library,
     make_media,
@@ -9,6 +7,7 @@ from conftest import (
     make_part,
     make_setting,
 )
+from previewmaid import Config, find_missing_metadata, setup_logging
 
 
 class TestFindMissingMetadata:
