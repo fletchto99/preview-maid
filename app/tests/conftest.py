@@ -2,7 +2,6 @@ import logging
 from types import SimpleNamespace
 
 import pytest
-
 from previewmaid import Config
 
 
